@@ -7,7 +7,7 @@ export default async function Home() {
 
     return (
         <div>
-            {handle} homepage
+            Home
         </div>
     );
 }
