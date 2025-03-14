@@ -1,28 +1,56 @@
-'use server'
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
+'use client';
 
+import { useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import clouthandleAPI from '@/lib/clouthandleAPI';
+import { useAppContext } from '@/contexts/AppContext';
+export default function LoginPage() {
 
-export default async function LoginPage({ searchParams }: { searchParams: { token?: string } }) {
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const token = searchParams.get('token');
 
+    const {user, setUser} = useAppContext()
 
+    const fetchUser = async () => {
+
+        try {
+            const response = await clouthandleAPI.post('/auth/refresh', {
+                refreshToken: token
+            })
     
-    const token = searchParams?.token;
-    
-    if (!token) {
-        return <p>Missing token</p>;
+            const {user, authToken} = response.data
+
+            setUser(user)
+
+        } catch (error) {
+            console.log(error);
+            
+        }
+        
     }
 
-    const cookieStore = await cookies()
+    useEffect(() => {
 
-    
+        if (!token) return;
 
-    cookieStore.set({
-        name: 'authToken',
-        value: token,
-        httpOnly: true,
-        path: '/',
-    })
+        fetchUser()
 
-    redirect('/admin');
+        // document.cookie = `authToken=${token}; path=/; secure; HttpOnly`;
+
+
+        router.push('/admin');
+
+
+
+    }, [token, router]);
+
+
+    if (!token) {
+        return (
+            <p><input type="text" /></p>
+        )
+    }
+
+    return <p>Logging in...</p>;
 }
