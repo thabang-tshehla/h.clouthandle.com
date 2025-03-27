@@ -4,20 +4,50 @@ import React, { useEffect, useState } from 'react'
 import { useAppContext } from '@/contexts/AppContext'
 import { useRouter } from 'next/navigation';
 import SpinnerLoader from '@/components/SpinnerLoader';
+import clouthandleAPI from '@/lib/clouthandleAPI';
 
 function layout({ children, }: { children: React.ReactNode }) {
 
     const router = useRouter();
-    const { user } = useAppContext()
+    const { user, setUser } = useAppContext()
     const [isChecking, setIsChecking] = useState(true);
 
 
+    const fetchUser = async (authToken: string) => {
+
+        const response = await clouthandleAPI.get('/auth', {
+            headers: {
+                Authorization: `Bearer ${authToken}`
+            }
+        })
+
+
+        setUser(response.data)
+        setIsChecking(false);
+         
+    }
+
     useEffect(() => {
+        
         if (!user) {
-            router.push('/login');
-        } else {
+
+            const authToken = localStorage.getItem('authToken')
+
+            if(!authToken){
+
+                router.push('/login');
+            }
+            else{
+
+                fetchUser(authToken)
+                
+            }
+            
+        }
+        else{
             setIsChecking(false);
         }
+
     }, [user, router]);
 
 

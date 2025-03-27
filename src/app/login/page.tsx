@@ -4,11 +4,12 @@ import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import clouthandleAPI from '@/lib/clouthandleAPI';
 import { useAppContext } from '@/contexts/AppContext';
+
 export default function LoginPage() {
 
     const router = useRouter();
     const searchParams = useSearchParams();
-    const token = searchParams.get('token');
+    const token = searchParams.get('authToken');
 
     const {user, setUser} = useAppContext()
 
@@ -32,9 +33,16 @@ export default function LoginPage() {
 
     useEffect(() => {
 
-        if (!token) return;
+        if (!token){
+            router.push('https://clouthandle.com/login')
+            return
+        }
 
-        fetchUser()
+
+        console.log(token);
+        
+        localStorage.setItem('authToken', token)
+        // fetc hUser()
 
         // document.cookie = `authToken=${token}; path=/; secure; HttpOnly`;
 
